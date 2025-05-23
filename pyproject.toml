@@ -1,13 +1,19 @@
 [project]
 name = "xarray-regressions"
-version = "0.1.0"
+version = "0.0.1"
 description = "pytest-regressions plugin for xarray"
 readme = "README.md"
 authors = [
     { name = "Aaron Zuspan", email = "aa.zuspan@gmail.com" }
 ]
 classifiers = [
-    "Framework :: Pytest"
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
 ]
 requires-python = ">=3.10"
 dependencies = [
