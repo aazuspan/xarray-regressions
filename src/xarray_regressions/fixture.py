@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, Union
 
 from pathlib import Path
 import os
@@ -10,7 +10,7 @@ import xarray as xr
 from xarray.core.utils import dict_equiv
 from xarray.core.formatting import diff_attrs_repr
 
-XarrayType = TypeVar("XarrayType", bound=xr.DataArray | xr.Dataset)
+XarrayType = TypeVar("XarrayType", bound=Union[xr.DataArray, xr.Dataset])
 
 
 def assert_attrs_equal(a: XarrayType, b: XarrayType) -> None:
