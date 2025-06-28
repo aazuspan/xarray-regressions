@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Equality checks now use a small tolerance by default to match [`ndarrays_regression`](https://pytest-regressions.readthedocs.io/en/latest/api.html#ndarrays-regression). Exact equality can be enforced by setting `rtol=0.0` and `atol=0.0`.
+
 ## [0.0.2] - 2025-06-26
 
 ### Added

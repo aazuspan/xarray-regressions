@@ -53,8 +53,8 @@ class XarrayRegressionFixture:
         *,
         basename: str | None = None,
         fullpath: os.PathLike[str] | None = None,
-        rtol: float | None = None,
-        atol: float | None = None,
+        rtol: float = 1e-05,
+        atol: float = 1e-08,
         check_attrs: bool = True,
         check_names: bool = True,
         load_fn: Callable[[Path], XarrayType] | None = None,
@@ -70,22 +70,15 @@ class XarrayRegressionFixture:
             load_fn = self._get_load_fn(obj)
         load_kwargs = load_kwargs or {}
         dump_kwargs = dump_kwargs or {}
-        atol = atol or 0.0
-        rtol = rtol or 0.0
 
         def check_fn(obtained_filename: Path, expected_filename: Path) -> None:
-            obtained_data = load_fn(obtained_filename, **load_kwargs)
-            expected_data = load_fn(expected_filename, **load_kwargs)
+            obtained = load_fn(obtained_filename, **load_kwargs)
+            expected = load_fn(expected_filename, **load_kwargs)
             if check_names and isinstance(obj, xr.DataArray):
-                assert_names_equal(obtained_data, expected_data)
-            if rtol or atol:
-                xr.testing.assert_allclose(
-                    obtained_data, expected_data, rtol=rtol, atol=atol
-                )
-            else:
-                xr.testing.assert_equal(obtained_data, expected_data)
+                assert_names_equal(obtained, expected)
             if check_attrs:
-                assert_attrs_equal(obtained_data, expected_data)
+                assert_attrs_equal(obtained, expected)
+            xr.testing.assert_allclose(obtained, expected, rtol=rtol, atol=atol)
 
         def dump_fn(filename: Path) -> None:
             obj.to_netcdf(filename, **dump_kwargs)
