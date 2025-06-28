@@ -5,12 +5,6 @@ import pytest
 
 from xarray_regressions import XarrayRegressionFixture
 
-# TODO
-# Solve the problem where --force-regen regenerates using the expected failures
-# Test with some real world data that has spatial reference, fill value, etc
-# Come up with a solution to test encoding
-# Ideally raise better warnings that refer to what changed, rather than left versus right sides
-
 
 @pytest.fixture
 def dataarray() -> xr.DataArray:
@@ -48,12 +42,29 @@ def test_dataarray_regression(
     xarray_regression.check(dataarray)
 
 
+def test_dataarray_regression_fails_with_exact_equality(
+    dataarray: xr.DataArray, xarray_regression: XarrayRegressionFixture
+):
+    """Test that setting rtol and atol to 0.0 enforces exact equality."""
+    xarray_regression.check(dataarray)
+
+    # By default, checks are done with a small tolerance and will pass minor differences
+    xarray_regression.check(dataarray + 1e-14, check_attrs=False)
+    with pytest.raises(AssertionError, match="DataArray objects are not close"):
+        xarray_regression.check(
+            dataarray + 1e-15,
+            rtol=0.0,
+            atol=0.0,
+            check_attrs=False,
+        )
+
+
 def test_dataarray_regression_with_tolerance(
     dataarray: xr.DataArray, xarray_regression: XarrayRegressionFixture
 ):
     dataarray = dataarray.astype(np.float32).drop_attrs()
     xarray_regression.check(dataarray)
-    rtol = 1e-5
+    rtol = 1e-2
     atol = 1e-3
     with pytest.raises(AssertionError, match="DataArray objects are not close"):
         xarray_regression.check(dataarray * (1 + rtol * 10), rtol=rtol)
@@ -88,10 +99,10 @@ def test_dataarray_regression_fails_with_mismatched_data(
     dataarray: xr.DataArray, xarray_regression: XarrayRegressionFixture
 ):
     xarray_regression.check(dataarray)
-    with pytest.raises(AssertionError, match="DataArray objects are not equal"):
+    with pytest.raises(AssertionError, match="DataArray objects are not close"):
         dataarray *= 2
         xarray_regression.check(dataarray)
-    with pytest.raises(AssertionError, match="DataArray objects are not equal"):
+    with pytest.raises(AssertionError, match="DataArray objects are not close"):
         dataarray = dataarray.astype(np.float32)
         xarray_regression.check(dataarray)
 

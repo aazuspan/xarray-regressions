@@ -56,7 +56,7 @@ def test_make_dataarray(xarray_regression: XarrayRegressionFixture):
     )
 ```
 
-Running the test once will write `da` to a local NetCDF[^netcdf], and future test runs will compare `da` with the stored result. Values, dimensions, and coordinates are checked using [xr.testing.assert_equal](https://docs.xarray.dev/en/stable/generated/xarray.testing.assert_equal.html) or [xr.testing.assert_allclose](https://docs.xarray.dev/en/latest/generated/xarray.testing.assert_allclose.html) (if `atol` or `rtol` are given). Names and attributes are checked seperately. Encodings are *not* currently checked.
+Running the test once will write `da` to a local NetCDF[^netcdf], and future test runs will compare `da` with the stored result. Values, dimensions, and coordinates are checked using [xr.testing.assert_allclose](https://docs.xarray.dev/en/latest/generated/xarray.testing.assert_allclose.html) to allow for minor floating point differences between systems, but can be tested for exact equality by specifying `rtol=0` and `atol=0`. Names and attributes are checked separately. Encodings are *not* currently checked.
 
 If `make_dataarray(name="test_array")` returns a different result in the future, the test will fail:
 
