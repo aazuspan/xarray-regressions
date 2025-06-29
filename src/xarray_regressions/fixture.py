@@ -4,6 +4,7 @@ from typing import Any, Callable, TypeVar, Union
 
 from pathlib import Path
 import os
+import re
 import pytest
 from pytest_regressions.common import perform_regression_check
 import xarray as xr
@@ -51,18 +52,60 @@ class XarrayRegressionFixture:
         self,
         obj: XarrayType,
         *,
+        obj_id: str | None = None,
         basename: str | None = None,
         fullpath: os.PathLike[str] | None = None,
         rtol: float = 1e-05,
         atol: float = 1e-08,
         check_attrs: bool = True,
-        check_names: bool = True,
+        check_name: bool = True,
         load_fn: Callable[[Path], XarrayType] | None = None,
         load_kwargs: dict[str, Any] | None = None,
         dump_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """
-        Check an xarray object against a previously recorded one, or generate a new file.
+        Compare an Xarray object to the previously stored result.
+
+        This minimally checks the values, dimensions, and coordinates of the object.
+        Attributes and DataArray names are checked by default. Encodings are *not*
+        currently checked.
+
+        Notes
+        -----
+        When run for the first time, this method will store the object as a NetCDF file.
+        Subsequent runs will read that file as the expected result.
+
+        Parameters
+        ----------
+        obj : xr.DataArray or xr.Dataset
+            The Xarray object to check.
+
+        obj_id : str, optional
+            A identifier appended to the basename to differentiate multiple checked
+            objects in the same test.
+
+        basename : str, optional
+            The base name for the regression file. If not provided, it defaults to a
+            sanitized version of the test name.
+
+        fullpath : os.PathLike[str], optional
+            The full path to the regression file. If provided, it overrides `basename`.
+
+        rtol : float, default 1e-05
+            Relative tolerance for comparing numerical values. Set to `0.0` for exact
+            equality. Passed to `xr.testing.assert_allclose`.
+
+        atol : float, default 1e-08
+            Absolute tolerance for comparing numerical values. Set to `0.0` for exact
+            equality. Passed to `xr.testing.assert_allclose`.
+
+        check_attrs : bool, default True
+            Whether to check the attributes of the Xarray object against the previous
+            result.
+
+        check_name : bool, default True
+            Whether to check the name of the DataArray against the previous result.
+            Ignored for Dataset objects, which always compare variable names.
         """
         ___tracebackhide__ = True  # noqa: F841
 
@@ -71,10 +114,16 @@ class XarrayRegressionFixture:
         load_kwargs = load_kwargs or {}
         dump_kwargs = dump_kwargs or {}
 
+        if basename is None:
+            # Matches the default basename format used by pytest-regressions
+            basename = re.sub(r"[\W]", "_", self.request.node.name)
+        if obj_id is not None:
+            basename = f"{basename}_{obj_id}"
+
         def check_fn(obtained_filename: Path, expected_filename: Path) -> None:
             obtained = load_fn(obtained_filename, **load_kwargs)
             expected = load_fn(expected_filename, **load_kwargs)
-            if check_names and isinstance(obj, xr.DataArray):
+            if check_name and isinstance(obj, xr.DataArray):
                 assert_names_equal(obtained, expected)
             if check_attrs:
                 assert_attrs_equal(obtained, expected)

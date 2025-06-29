@@ -90,9 +90,17 @@ def test_dataarray_regression_ignore_names(
 ):
     xarray_regression.check(dataarray)
     dataarray = dataarray.rename("other_name")
-    xarray_regression.check(dataarray, check_names=False)
+    xarray_regression.check(dataarray, check_name=False)
     dataarray = dataarray.rename("other_name2")
-    xarray_regression.check(dataarray, check_names=False)
+    xarray_regression.check(dataarray, check_name=False)
+
+
+def test_dataarray_regression_with_different_ids(
+    dataarray: xr.DataArray, xarray_regression: XarrayRegressionFixture
+):
+    """Test that checking different objects succeeds if they have different IDs."""
+    xarray_regression.check(dataarray.rename("dataarray1"), obj_id="da1")
+    xarray_regression.check(dataarray.rename("dataarray2"), obj_id="da2")
 
 
 def test_dataarray_regression_fails_with_mismatched_data(

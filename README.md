@@ -51,7 +51,7 @@ def test_make_dataarray(xarray_regression: XarrayRegressionFixture):
     da = make_dataarray(name="test_array")
     xarray_regression.check(
         da,
-        check_names=True,
+        check_name=True,
         check_attrs=True,
     )
 ```
@@ -63,5 +63,21 @@ If `make_dataarray(name="test_array")` returns a different result in the future,
 ```text
 AssertionError: DataArray names are different. L: foo, R: test_array
 ```
+
+### Testing multiple objects
+
+To test multiple objects in the same test, you can pass an `obj_id` argument to the `check` method. This will be appended to the `basename` (by default, the name of the test) so that each object is saved to a separate file.
+
+```python
+def test_make_dataarray(xarray_regression: XarrayRegressionFixture):
+    """Test that the function always returns an identical xr.DataArray."""
+    da1 = make_dataarray(name="test_array_1")
+    da2 = make_dataarray(name="test_array_2")
+    
+    xarray_regression.check(da1, obj_id="da1", check_name=True)
+    xarray_regression.check(da2, obj_id="da2", check_name=True)
+```
+
+When adding new tests with multiple objects, the [`--regen-all` flag](https://pytest-regressions.readthedocs.io/en/latest/overview.html#regen-all) can be helpful to avoid `pytest-regressions` aborting on the first missing file.
 
 [^netcdf]: Because results are stored in NetCDF, all tested objects *must* be serializable.
