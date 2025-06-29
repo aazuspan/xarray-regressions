@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Equality checks now use a small tolerance by default to match [`ndarrays_regression`](https://pytest-regressions.readthedocs.io/en/latest/api.html#ndarrays-regression). Exact equality can be enforced by setting `rtol=0.0` and `atol=0.0`.
+- Renamed `check_names` parameter to `check_name` for clarity.
+
+### Added
+
+- The `check` method now accepts an `obj_id` argument to differentiate between multiple objects in the same test. The ID will be appended to the basename of the test, allowing each object to be tested against itself.
 
 ## [0.0.2] - 2025-06-26
 
