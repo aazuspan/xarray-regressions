@@ -1,6 +1,6 @@
 [project]
 name = "xarray-regressions"
-version = "0.0.2"
+version = "0.0.3"
 description = "pytest-regressions plugin for xarray"
 readme = "README.md"
 authors = [
